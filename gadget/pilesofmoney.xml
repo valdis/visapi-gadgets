@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+  <ModulePrefs title="Piles of Money" 
+      author="The visapi-gadgest project"
+      author_email="visapi.gadgets@gmail.com"
+      description="Create a chart using $100 bills"
+      thumbnail="http://visapi-gadgets.googlecode.com/svn/trunk/image/thumb_pilesofmoney.png" 
+      screenshot="http://visapi-gadgets.googlecode.com/svn/trunk/image/sh_pilesofmoney.png">
+    <Require feature="idi"/>
+    <Require feature="locked-domain"/>  
+    <Require feature="settitle"/>  
+  </ModulePrefs>
+  <UserPref name="_table_query_url" display_name="Data source URL" required="true"/>
+  <UserPref name="title" display_name="Gadget Title (optional)" required="false"/>
+  <UserPref name="header" display_name="Chart Header (optional)" required="false"/>
+  <UserPref name="minval" display_name="Minimal value (optional)" required="false"/>
+  <UserPref name="maxval" display_name="Maximal value (optional)" required="false"/>
+  <Content type="html">
+  <![CDATA[
+  <link rel="stylesheet" type="text/css" href="http://visapi-gadgets.googlecode.com/svn/trunk/pilesofmoney/pom.css" />
+  <div id="chart" style="overflow: auto"><img src="http://visapi-gadgets.googlecode.com/svn/trunk/image/spinner.gif" /></div>
+  <script type="text/javascript" src="http://visapi-gadgets.googlecode.com/svn/trunk/pilesofmoney/pom.js"></script>
+  <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+  <script type="text/javascript">
+    _IG_RegisterOnloadHandler(loadAPI);
+    
+    function loadAPI() {
+      google.load('visualization', '1');
+      google.setOnLoadCallback(init);
+    }  
+
+    var prefs = null;
+
+    function init() {
+      prefs = new _IG_Prefs();
+      var title = prefs.getString('title');
+      if (title) {
+        _IG_SetTitle(title);
+      }
+      var container = document.getElementById('chart');
+      container.style.width = document.body.clientWidth + 'px';
+      container.style.height = document.body.clientHeight + 'px';
+      sendQuery();
+    }
+
+    var gadgetHelper = null;
+    function sendQuery() {
+      gadgetHelper = gadgetHelper || new google.visualization.GadgetHelper();
+      var query = gadgetHelper.createQueryFromPrefs(prefs);
+      query.send(handleQueryResponse);  
+    }
+    
+    function handleQueryResponse(response) {
+      // Default error message handling
+      if (!gadgetHelper.validateResponse(response))
+        return;
+      
+      var data = response.getDataTable();
+      var title = prefs.getString('header');
+      var min = prefs.getInt('minval');
+      var max = prefs.getInt('maxval');
+      var options = {};
+      if (title) options.title = title;
+      if (min) options.min = min;
+      if (max) options.max = max;
+      var chart = new PilesOfMoney(document.getElementById('chart'));
+      chart.draw(data, options);
+    }   
+  </script>
+  ]]>
+ </Content>
+</Module>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+  <ModulePrefs title="Bars of Stuff" 
+      author="The visapi-gadgest project"
+      author_email="visapi.gadgets@gmail.com"
+      description="Fun bar charts using images or trains, chocolate, worms, and more"
+      thumbnail="http://visapi-gadgets.googlecode.com/svn/trunk/image/thumb_barsofstuff.png" 
+      screenshot="http://visapi-gadgets.googlecode.com/svn/trunk/image/sh_barsofstuff.png">
+    <Require feature="idi"/>
+    <Require feature="locked-domain"/>  
+    <Require feature="settitle"/>  
+  </ModulePrefs>
+  <UserPref name="_table_query_url" display_name="Data source URL" required="true"/>
+  <UserPref name="title" display_name="Gadget Title (optional)" required="false"/>
+  <UserPref name="header" display_name="Chart Header (optional)" required="false"/>
+  <UserPref name="imgtype" 
+     display_name="Type"
+     datatype="enum"
+     default_value="0">
+    <EnumValue value="0" display_value="Train"/>
+    <EnumValue value="1" display_value="Chocolate"/>
+    <EnumValue value="2" display_value="Rope"/>
+    <EnumValue value="3" display_value="Truffles"/>
+    <EnumValue value="4" display_value="Worm"/>
+    <EnumValue value="5" display_value="Horse"/>
+  </UserPref>  
+  <UserPref name="minval" display_name="Minimal value (optional)" required="false"/>
+  <UserPref name="maxval" display_name="Maximal value (optional)" required="false"/>
+  <Content type="html">
+  <![CDATA[
+  <link rel="stylesheet" type="text/css" href="http://visapi-gadgets.googlecode.com/svn/trunk/barsofstuff/bos.css" />
+  <div id="chart" style="overflow: auto"><img src="http://visapi-gadgets.googlecode.com/svn/trunk/image/spinner.gif" /></div>
+  <script type="text/javascript" src="http://visapi-gadgets.googlecode.com/svn/trunk/barsofstuff/bos.js"></script>
+  <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+  <script type="text/javascript">
+    _IG_RegisterOnloadHandler(loadAPI);
+    
+    function loadAPI() {
+      google.load('visualization', '1');
+      google.setOnLoadCallback(init);
+    }  
+
+    var prefs = null;
+
+    function init() {
+      prefs = new _IG_Prefs();
+      var title = prefs.getString('title');
+      if (title) {
+        _IG_SetTitle(title);
+      }
+      var container = document.getElementById('chart');
+  var myWidth = 0, myHeight = 0;
+  if( typeof( window.innerWidth ) == 'number' ) {
+    //Non-IE
+    myWidth = window.innerWidth;
+    myHeight = window.innerHeight;
+  } else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
+    //IE 6+ in 'standards compliant mode'
+    myWidth = document.documentElement.clientWidth;
+    myHeight = document.documentElement.clientHeight;
+  } else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
+    //IE 4 compatible
+    myWidth = document.body.clientWidth;
+    myHeight = document.body.clientHeight;
+  }
+      container.style.width = myWidth + 'px';
+      container.style.height = myHeight + 'px';
+      sendQuery();
+    }
+
+    var gadgetHelper = null;
+
+    function sendQuery() {
+      gadgetHelper = gadgetHelper || new google.visualization.GadgetHelper();
+      var query = gadgetHelper.createQueryFromPrefs(prefs);
+      query.send(handleQueryResponse);  
+    }
+    
+    function handleQueryResponse(response) {
+      // Default error message handling
+      if (!gadgetHelper.validateResponse(response))
+        return;
+      
+      var data = response.getDataTable();
+      var TYPES = ['train', 'chocolate', 'rope', 'truffle', 'worm', 'horse'];
+      var title = prefs.getString('header');
+      var min = prefs.getInt('minval');
+      var max = prefs.getInt('maxval');
+      var options = {};
+      if (title) options.title = title;
+      if (min) options.min = min;
+      if (max) options.max = max;
+      options.type = TYPES[prefs.getString('imgtype')];
+      var chart = new BarsOfStuff(document.getElementById('chart'));
+      chart.draw(data, options);
+    }   
+  </script>
+  ]]>
+ </Content>
+</Module>

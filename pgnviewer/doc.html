@@ -1,0 +1,112 @@
+<html>
+<head>
+<title>Chess viewer - Sample</title>
+<style>
+body, td, th { font-family: verdana, arial, helvetica; }
+th { background-color: #9999ff }
+pre { border: 1px solid #333333; background-color: #f7f7f7; }
+</style>
+</head>
+<body>
+
+<h1>Chess viewer - Sample</h1>
+
+<h2>Overview</h2>
+A chess game viewer, displaying the board based on the moves typed on the spreadsheet.
+This visualization is a thin wrapper around LT-PGN-VIEWER 3.4 chess game viewer (http://www.lutanho.net/pgn/pgnviewer.html).
+
+<h2>Example</h2>
+  <iframe id="board" width="500" height="500" scrolling="no">
+  </iframe>
+    
+<script type="text/javascript" src="http://visapi-gadgets.googlecode.com/svn/trunk/pgnviewer/chessviewer.js"></script>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">
+google.load('visualization', '1');
+google.setOnLoadCallback(drawBoard);
+var board;
+function drawBoard() {
+  data = new google.visualization.DataTable();
+  data.addColumn('string', 'White');
+  data.addColumn('string', 'Black');
+  data.addRows(3);
+  data.setValue(0, 0, 'g4');
+  data.setValue(0, 1, 'e5');
+  data.setValue(1, 1, 'b4');
+  data.setValue(1, 2, 'b5!');
+  data.setValue(2, 0, 'f4');
+  data.setValue(2, 1, 'Qh4+');
+  
+  var ifr = document.getElementById('board');
+  var board = new Chess(ifr);
+  board.draw(data, options);
+}
+</script>
+
+<h2>Sample Code</h2>
+
+<pre>
+&lt;html&gt;
+  &lt;head&gt;
+    <span style="background-color: yellow">&lt;script type="text/javascript" src="http://visapi-gadgets.googlecode.com/svn/trunk/pgnviewer/chessviewer.js"&gt;&lt;/script&gt;</span>
+    &lt;script type="text/javascript" src="http://www.google.com/jsapi"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    <span style="background-color: yellow">&lt;iframe id="board" style="width: 500px"  scrolling="no"&gt;&lt;/iframe&gt;</span>
+    &lt;script type="text/javascript"&gt;
+      google.load("visualization", "1");
+      google.setOnLoadCallback(drawBoard);
+	  var board;
+	  function drawBoard() {
+	    data = new google.visualization.DataTable();
+	    data.addColumn('string', 'White');
+	    data.addColumn('string', 'Black');
+	    data.addRows(3);
+	    data.setValue(0, 0, 'g4');
+	    data.setValue(0, 1, 'e5');
+	    data.setValue(1, 1, 'b4');
+	    data.setValue(1, 2, 'b5!');
+	    data.setValue(2, 0, 'f4');
+	    data.setValue(2, 1, 'Qh4+');
+	  
+	    var ifr = document.getElementById('board');
+	    var board = new Chess(ifr);
+	    board.draw(data, options);
+      }
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+<h2>Expected Data Format</h2>
+
+Two columns with text. The first column is the moves of the white player, and the second is of the black player.
+There is no limit to the number of rows.
+The moves format is the common chess format, as described in http://en.wikipedia.org/wiki/Algebraic_chess_notation.
+
+<h2>Options</h2>
+
+none
+
+<h2>Methods</h2>
+
+none
+
+
+<h2>Events</h2>
+
+none
+
+<h2>Data Policy</h2>
+All the data remains on the client, no data is sent to a server.
+
+<h2>License</h2>
+This visualization can be freely used by anyone.
+The entire <a href="http://visapi-gadgets.googlecode.com/svn/trunk/pgnviewer/chess.js">source code</a> is open-source. You can look at the code,
+copy the code, and modify it.
+
+<h2>Contact Information</h2>
+For comments, ideas problem reports please contact visapi.gadgets<b>@</b>gmail.com.
+
+</body>
+</html>

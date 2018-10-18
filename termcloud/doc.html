@@ -1,0 +1,107 @@
+<html>
+<head>
+<title>TermCloud - Sample</title>
+<link rel="stylesheet" type="text/css" href="http://visapi-gadgets.googlecode.com/svn/trunk/termcloud/tc.css" />
+</head>
+<body>
+
+<h1>TermCloud - Sample</h1>
+
+<h2>Overview</h2>
+A list of terms, where the size and color of each word is determined
+by a specified frequency value (typically the number of times it appears in some text).
+
+<h2>Example</h2>
+<table>
+  <tr valign="top">
+    <td><div id="tcdiv" style="width: 200px; border: 1px solid #ccc"></div></td>
+    <td width="30"></td>
+    <td><div id="tablediv"></div></td>
+  </tr>
+</table>
+
+<script type="text/javascript" src="http://visapi-gadgets.googlecode.com/svn/trunk/termcloud/tc.js"></script>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">
+google.load('visualization', '1', {packages: ['table']});
+google.setOnLoadCallback(draw);
+function draw() {
+  data = new google.visualization.DataTable();
+  data.addColumn('string', 'Label');
+  data.addColumn('number', 'Value');
+  data.addColumn('string', 'Link');
+  data.addRows(3);
+  data.setValue(0, 0, 'First Term');
+  data.setValue(0, 1, 10);
+  data.setValue(1, 0, 'Second');
+  data.setValue(1, 1, 30);
+  data.setValue(1, 2, 'http://www.google.com');
+  data.setValue(2, 0, 'Third');
+  data.setValue(2, 1, 20);
+  var outputDiv = document.getElementById('tcdiv');
+  var tc = new TermCloud(outputDiv);
+  tc.draw(data, null);
+
+  table = new google.visualization.Table(document.getElementById('tablediv'));
+  table.draw(data);
+}
+</script>
+
+<h2>Sample Code</h2>
+
+<pre>
+&lt;html&gt;
+  &lt;head&gt;
+    <span style="background-color: yellow">&lt;link rel="stylesheet" type="text/css" href="http://visapi-gadgets.googlecode.com/svn/trunk/termcloud/tc.css"/&gt;</span>
+    <span style="background-color: yellow">&lt;script type="text/javascript" src="http://visapi-gadgets.googlecode.com/svn/trunk/termcloud/tc.js"&gt;&lt;/script&gt;</span>
+    &lt;script type="text/javascript" src="http://www.google.com/jsapi"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id="tcdiv"&gt;&lt;/div&gt;
+    &lt;script type="text/javascript"&gt;
+      google.load("visualization", "1");
+      google.setOnLoadCallback(draw);
+      function draw() {
+        data = new google.visualization.DataTable();
+        data.addColumn('string', 'Label');
+        data.addColumn('number', 'Value');
+        data.addColumn('string', 'Link');
+        data.addRows(3);
+        data.setValue(0, 0, 'First Term');
+        data.setValue(0, 1, 10);
+        data.setValue(1, 0, 'Second');
+        data.setValue(1, 1, 30);
+        data.setValue(1, 2, 'http://www.google.com');
+        data.setValue(2, 0, 'Third');
+        data.setValue(2, 1, 20);
+        var outputDiv = document.getElementById('tcdiv');
+        <span style="background-color: yellow">var tc = new TermCloud(outputDiv);</span>
+        tc.draw(data, null);
+      }
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+<h2>Expected Data Format</h2>
+
+The first column is a string with the term.
+The second column is a positive number with the freqency of this term, typically the number of times
+the term appears in some text.
+A third optional column is a string with a link (url) that should be opened when the term is clicked.
+
+<h2>Options</h2>
+<tt>target</tt> Target for the links. default is '_top' which means the main current page.
+Use '_blank' to open links in a new tab.
+
+<h2>Methods</h2>
+getSelection - Standard selection. Only one row element can be selected.
+
+<h2>Events</h2>
+select - Standard selection event
+
+<h2>Contact Information</h2>
+For comments, ideas problem reports please contact visapi.gadgets<b>@</b>gmail.com.
+
+</body>
+</html>

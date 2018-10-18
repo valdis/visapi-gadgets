@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+  <ModulePrefs title="Term Cloud" 
+      author="The visapi-gadgest project"
+      author_email="visapi.gadgets@gmail.com"
+      description="Shows which terms appear more often in text and which less"
+      thumbnail="http://visapi-gadgets.googlecode.com/svn/trunk/image/thumb_termcloud.png" 
+      screenshot="http://visapi-gadgets.googlecode.com/svn/trunk/image/sh_termcloud.png">
+    <Require feature="idi"/>
+    <Require feature="locked-domain"/>  
+  </ModulePrefs>
+  <UserPref name="_table_query_url" display_name="Data source URL" required="true"/>
+  <UserPref name="target" display_name="Links target (optional)" required="false"/>
+  <Content type="html">
+  <![CDATA[
+    <div id="chart" style="overflow: auto"><img src="http://visapi-gadgets.googlecode.com/svn/trunk/image/spinner.gif" /></div>
+    <link rel="stylesheet" type="text/css" href="http://visapi-gadgets.googlecode.com/svn/trunk/termcloud/tc.css" />
+    <script type="text/javascript" src="http://visapi-gadgets.googlecode.com/svn/trunk/termcloud/tc.js"></script>
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+
+    <script type="text/javascript">
+      google.load("visualization", "1");
+      google.setOnLoadCallback(initialize); // Set callback to run when API is loaded
+
+      function initialize() {
+        // Create and send the query.
+        var prefs = new _IG_Prefs(); // User preferences
+        gadgetHelper = new google.visualization.GadgetHelper();
+        var container = document.getElementById('chart');
+        container.style.width = document.body.clientWidth + 'px';
+        container.style.height = document.body.clientHeight + 'px';
+        var query = gadgetHelper.createQueryFromPrefs(prefs);
+        query.send(handleQueryResponse);  // Send the query with a callback function
+      }
+
+      // Query response handler function.
+      function handleQueryResponse(response) {
+        // Default error message handling
+        if (!gadgetHelper.validateResponse(response))
+          return;
+      
+        var data = response.getDataTable();
+        var prefs = new _IG_Prefs();
+        var options = {};
+        options.target = prefs.getString('target');
+        var chart = new TermCloud(document.getElementById('chart'));
+        chart.draw(data, options);
+      };
+    </script>
+  ]]>
+ </Content>
+</Module>

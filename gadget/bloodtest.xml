@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+  <ModulePrefs title="Understand Blood Test Results" 
+      author="The visapi-gadgest project"
+      author_email="visapi.gadgets@gmail.com"
+      description="Understand Blood Test Results"
+      thumbnail="http://visapi-gadgets.googlecode.com/svn/trunk/image/thumb_bloodtest.png" 
+      screenshot="http://visapi-gadgets.googlecode.com/svn/trunk/image/sh_bloodtest.png">
+    <Require feature="idi"/>
+    <Require feature="locked-domain"/>  
+  </ModulePrefs>
+  <UserPref name="_table_query_url" display_name="Data source URL" required="true"/>
+  <UserPref name="gender" 
+     display_name="Gender"
+     datatype="enum"
+     default_value="M">
+    <EnumValue value="M" display_value="Male"/>
+    <EnumValue value="F" display_value="Female"/>
+  </UserPref>  
+  <UserPref name="age" 
+     display_name="Age"
+     datatype="enum"
+     default_value="0">
+    <EnumValue value="0" display_value="Adult"/>
+    <EnumValue value="1" display_value="Child"/>
+    <EnumValue value="2" display_value="Infant"/>
+    <EnumValue value="3" display_value="Newborn"/>
+  </UserPref>  
+  <Content type="html">
+  <![CDATA[
+<style>
+.medicaltest-table { border: 1px solid black; border-collapse: collapse;}
+.medicaltest-td-head { font-weight: bold !important; background-color: #d5e5f5; text-align: center}
+.medicaltest-td { padding: 2; margin: 0; border: 1px solid #c0c0c0; font-family: vedana,ariel,helvetica; font-size: 0.6em; font-weight: normal; }
+.medicaltest-td-result { text-align: center; }
+.medicaltest-td-low { font-size: 0.5em; text-align: right; }
+.medicaltest-td-high { font-size: 0.5em; }
+.medicaltest-td-range { width: 100px; background: #f0f0f0 url(http://visapi-gadgets.googlecode.com/svn/trunk/image/bt_bg.png) no-repeat center; }
+.medicaltest-td-unit { font-size: 0.5em; text-align: center; }
+.medicaltest-td-more { }
+.medicaltest-disclaimer { background-color: #FCDB00; font-size: 0.6em; padding-left: 2px; padding-right: 2px; margin-bottom: 3px; }
+</style>
+
+  <div id="output" style="overflow: auto"> 
+    <div class="medicaltest-disclaimer">
+      Disclaimer: The information is provided as-is, no warrenty, always consult your doctor.
+    </div>
+    <div id="report"><img src="http://visapi-gadgets.googlecode.com/svn/trunk/image/spinner.gif" />
+    </div>
+  </div>  
+  <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+  <script type="text/javascript">
+
+   
+var DB =
+[
+  {
+    names: ['Sodium (Na)', 'sodium', 'na'],
+    unit: 'mmol/L or mEq/L',
+    ranges: [{min: 136, max: 145}],
+    more: [
+	{ name: 'webmd', url: 'http://www.webmd.com/a-to-z-guides/sodium-na-in-blood'},
+	{ name: 'wikipedia',  url: 'http://en.wikipedia.org/wiki/Blood_test'}
+    ]
+  },
+  {
+    names: ['Potassium (K)', 'potassium', 'k'],
+    unit: 'mmol/L or mEq/L',
+    ranges: [{age: 'adult', min: 3.5, max: 5.0},{age: 'children', min: 3.4, max: 4.7},{age: 'infant', min: 4.1, max: 5.3},{age: 'newborn', min: 3.9, max: 5.9}],
+    more: [
+	{ name: 'webmd', url: 'http://www.webmd.com/a-to-z-guides/potassium-k-in-blood'},
+	{ name: 'wikipedia',  url: 'http://en.wikipedia.org/wiki/Blood_test'}
+    ]
+  },
+  {
+    names: ['Glucose (fasting)', 'glc', 'fsb'],
+    unit: 'mmol/L',
+    ranges: [{min: 3.9, max: 5.8}],
+    more: [
+	{ name: 'webmd', url: 'http://diabetes.webmd.com/blood-glucose'},
+	{ name: 'wikipedia',  url: 'http://en.wikipedia.org/wiki/Blood_test'}
+    ]
+  },
+  {
+    names: ['Blood Urea Nitrogen', 'bun', 'urea'],
+    unit: 'mmol/L',
+    ranges: [{min: 3.6, max: 7.1}],
+    more: [
+	{ name: 'NIH', url: 'www.nlm.nih.gov/medlineplus/ency/article/003474.htm'},
+	{ name: 'webmd', url: 'http://www.webmd.com/a-to-z-guides/blood-urea-nitrogen'},
+	{ name: 'wikipedia',  url: 'http://en.wikipedia.org/wiki/Urea'}
+    ]
+  },
+  {
+    names: ['Creatinine', 'glc', 'fsb'],
+    unit: 'µmol/L',
+    ranges: [{min: 62, max: 115}],
+    more: [
+	{ name: 'webmd', url: 'http://diabetes.webmd.com/blood-glucose'},
+	{ name: 'wikipedia',  url: 'http://en.wikipedia.org/wiki/Blood_test'}
+    ]
+  }
+];
+
+
+    _IG_RegisterOnloadHandler(loadAPI);
+    
+    function loadAPI() {
+      google.load('visualization', '1');
+      google.setOnLoadCallback(init);
+    }  
+
+    var prefs = null;
+
+    function init() {
+      prefs = new _IG_Prefs();
+      var container = document.getElementById('output');
+      container.style.width = document.body.clientWidth + 'px';
+      container.style.height = document.body.clientHeight + 'px';
+      sendQuery();
+    }
+
+    var gadgetHelper = null;
+
+    function sendQuery() {
+      gadgetHelper = gadgetHelper || new google.visualization.GadgetHelper();
+      var query = gadgetHelper.createQueryFromPrefs(prefs);
+      query.send(handleQueryResponse);  
+    }
+    
+    function handleQueryResponse(response) {
+      // Default error message handling
+      if (!gadgetHelper.validateResponse(response))
+        return;
+      
+      var data = response.getDataTable();
+      if (data.getNumberOfColumns() < 2 || 
+          data.getColumnType(0) != 'string' || 
+          data.getColumnType(1) != 'number') {
+        var msg = 'Data must have 1 string column with test name, and one number with test result';
+        document.getElementById('report').innerHTML = '<b>' + msg + '</b>';
+        return;
+      }
+      
+      createReport(data);
+    }   
+    
+function addLine(html, name, value) {
+  var min = '?';
+  var max = '?';
+  var extName = name;
+  var offset = -1;
+  var unit = '?';
+  var more = [];
+
+  // Find by name in DB
+  var i;
+  var dbEntry = null;
+  for (i = 0; !dbEntry && i < DB.length; i++) {
+    var entry = DB[i];
+    var names = entry.names;
+    for (var j = 0; !dbEntry && j < names.length; j++) {
+      if (name.toLowerCase() == names[j].toLowerCase()) {
+        dbEntry = entry;
+      }
+    }
+  }
+
+  if (dbEntry) {
+    extName = dbEntry.names[0];
+    var ranges = dbEntry.ranges;
+    min = ranges[0].min;
+    max = ranges[0].max;
+    unit = dbEntry.unit;
+    more = dbEntry.more;
+
+    // Compute offset
+    if (value < min) {
+      offset = 0;
+    } else if (value > max) {
+      offset = 94;
+    } else {
+      var rangeSize = max - min;
+      var valueOffset = value - min;
+      offset = Math.round((valueOffset / rangeSize) * 77 + 9);
+    }
+  }
+
+  html.push('<tr>');
+  html.push('<td class="medicaltest-td">', extName, '</td>');
+  html.push('<td class="medicaltest-td medicaltest-td-result">', value, '</td>');
+  html.push('<td class="medicaltest-td medicaltest-td-low">', min, '</td>');
+
+  html.push('<td class="medicaltest-td medicaltest-td-range">');
+  if (dbEntry) {
+    html.push('<nobr><img src="http://visapi-gadgets.googlecode.com/svn/trunk/image/bt_tr.png" width="', offset, '" height="1" /><img src="http://visapi-gadgets.googlecode.com/svn/trunk/image/bt_hand.png" width="5" height="11" /></nobr>');
+  }
+  html.push('</td>');
+
+  html.push('<td class="medicaltest-td medicaltest-td-high">', max, '</td>');
+  html.push('<td class="medicaltest-td medicaltest-td-unit">', unit, '</td>');
+
+  html.push('<td class="medicaltest-td">');
+  for (i = 0; i < more.length; i++) {
+    if (i > 0) {
+      html.push(' | ');
+    }
+    html.push('<a class="medicaltest-a-more" target="_blank" href="', more[i].url, '">', more[i].name, '</a>');
+  }
+
+  html.push('</td>');
+  html.push('</tr>');
+}
+
+function createReport(data) {
+  var html = [];
+  html.push('<table class="medicaltest-table">');
+
+  html.push('<tr class="medicaltest-tr">');
+  html.push('<td class="medicaltest-td medicaltest-td-head">Test</td>');
+  html.push('<td class="medicaltest-td medicaltest-td-head">Result</td>');
+  html.push('<td class="medicaltest-td medicaltest-td-head" colspan="3">Normal range</td>');
+  html.push('<td class="medicaltest-td medicaltest-td-head">Unit</td>');
+  html.push('<td class="medicaltest-td medicaltest-td-head">More information</td>');
+  html.push('</tr>');
+
+  for (var r = 0; r < data.getNumberOfRows(); r++) {
+    var name = data.getValue(r, 0);
+    var value = data.getValue(r, 1);
+    if (name != null && value != null) {
+      addLine(html, name, value);
+    }
+  }
+
+  html.push('</table>');
+
+  document.getElementById('report').innerHTML = html.join('');
+}    
+  </script>
+  ]]>
+ </Content>
+</Module>

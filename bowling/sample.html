@@ -1,0 +1,47 @@
+<html>
+<head>
+<title>Bowling - Sample</title>
+<link rel="stylesheet" type="text/css" href="http://visapi-gadgets.googlecode.com/svn/trunk/bowling/bowling.css" />
+</head>
+<body>
+<div id="bowlingDiv"><img src="http://visapi-gadgets.googlecode.com/svn/trunk/image/spinner.gif" /></div>
+<script type="text/javascript" src="http://visapi-gadgets.googlecode.com/svn/trunk/bowling/bowling.js"></script>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">
+google.load("visualization", "1");
+google.setOnLoadCallback(initialize); // Set callback to run when API is loaded
+function initialize() {
+  // Create and send the query.
+  // gadgetHelper = new google.visualization.GadgetHelper();
+  // var query = gadgetHelper.createQueryFromPrefs(prefs);
+  // query.send(handleQueryResponse);  // Send the query with a callback function
+  drawTable();
+}
+
+</script>
+
+<script>
+var chart;
+var data;
+var options = null;
+function drawTable() {
+  data = new google.visualization.DataTable();
+  data.addColumn('number', 'John');
+  data.addColumn('number', '');
+  data.addColumn('number', 'Mike');
+  data.addColumn('number', '');
+  data.addRows(3);
+  data.setValue(0, 0, 2);
+  data.setValue(0, 1, 5);
+  data.setValue(0, 2, 0);
+  data.setValue(0, 3, 6);
+  data.setValue(1, 0, 8);
+  data.setValue(1, 1, 2);
+  data.setValue(1, 2, 4);
+  var outputDiv = document.getElementById('bowlingDiv');
+  table = new Bowling(outputDiv);
+  table.draw(data, options);
+}
+</script>
+</body>
+</html>

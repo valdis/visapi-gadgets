@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+  <ModulePrefs title="Chess Viewer" 
+      author="The visapi-gadgest project"
+      author_email="visapi.gadgets@gmail.com"
+      description="Chess game viewer, based on the LT-PGN-VIEWER 3.4 (http://www.lutanho.net/pgn/pgnviewer.html)"
+      thumbnail="http://visapi-gadgets.googlecode.com/svn/trunk/image/thumb_chess.png" 
+      screenshot="http://visapi-gadgets.googlecode.com/svn/trunk/image/sh_chess.png"
+      scrolling="true">
+    <Require feature="idi"/>
+    <Require feature="locked-domain"/>  
+    <Require feature="settitle"/>  
+  </ModulePrefs>
+  <UserPref name="_table_query_url" display_name="Data source URL" required="true"/>
+  <UserPref name="title" display_name="Gadget Title (optional)" required="false"/>
+  <Content type="html">
+  <![CDATA[
+  <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+  <iframe id="board" width="500" height="500" scrolling="no">
+    <div style="overflow: auto; background-color: black;"><b style="color: white;">Loading...</b></div>
+  </iframe>
+  
+  <script type="text/javascript" src="http://visapi-gadgets.googlecode.com/svn/trunk/pgnviewer/chessviewer.js"></script>
+  <script type="text/javascript">
+    _IG_RegisterOnloadHandler(loadAPI);
+    
+    function loadAPI() {
+      google.load('visualization', '1');
+      google.setOnLoadCallback(init);
+    }  
+
+    var prefs = null;
+
+    function init() {
+      prefs = new _IG_Prefs();
+      var title = prefs.getString('title');
+      if (title) {
+        _IG_SetTitle(title);
+      }
+      var container = document.getElementById('board');
+      container.style.width = document.body.clientWidth + 'px';
+      container.style.height = document.body.clientHeight + 'px';
+      sendQuery();
+    }
+
+    var gadgetHelper = null;
+    function sendQuery() {
+      gadgetHelper = gadgetHelper || new google.visualization.GadgetHelper();
+      var query = gadgetHelper.createQueryFromPrefs(prefs);
+      query.send(handleQueryResponse);  
+    }
+    
+    function handleQueryResponse(response) {
+      // Default error message handling
+      if (!gadgetHelper.validateResponse(response))
+        return;
+      
+      var data = response.getDataTable();
+      var options = null;
+      var board = new Chess(document.getElementById('board'));
+      board.draw(data, options);
+    }   
+  </script>
+  ]]>
+ </Content>
+</Module>

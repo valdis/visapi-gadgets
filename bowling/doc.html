@@ -1,0 +1,116 @@
+<html>
+<head>
+<title>Bowling - Sample</title>
+<link rel="stylesheet" type="text/css" href="http://visapi-gadgets.googlecode.com/svn/trunk/bowling/bowling.css" />
+<style>
+body, td, th { font-family: verdana, arial, helvetica; }
+th { background-color: #9999ff }
+pre { border: 1px solid #333333; background-color: #f7f7f7; }
+</style>
+</head>
+<body>
+
+<h1>Bowling - Sample</h1>
+
+<h2>Overview</h2>
+A bowling score table for a game in process or for a game that was ended.
+
+<h2>Example</h2>
+<div id="bowlingDiv" style="width:500px"></div>
+
+<script type="text/javascript" src="http://visapi-gadgets.googlecode.com/svn/trunk/bowling/bowling.js"></script>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">
+google.load('visualization', '1');
+google.setOnLoadCallback(drawChart);
+var chart;
+function drawChart() {
+  data = new google.visualization.DataTable();
+  data.addColumn('number', 'John');
+  data.addColumn('number', '');
+  data.addColumn('number', 'Mike');
+  data.addColumn('number', '');
+  data.addRows(3);
+  data.setValue(0, 0, 2);
+  data.setValue(0, 1, 5);
+  data.setValue(0, 2, 0);
+  data.setValue(0, 3, 6);
+  data.setValue(1, 0, 8);
+  data.setValue(1, 1, 2);
+  data.setValue(1, 2, 4);
+  var outputDiv = document.getElementById('bowlingDiv');
+  table = new Bowling(outputDiv);
+  table.draw(data, null);
+}
+</script>
+
+<h2>Sample Code</h2>
+
+<pre>
+&lt;html&gt;
+  &lt;head&gt;
+    <span style="background-color: yellow">&lt;link rel="stylesheet" type="text/css" href="http://visapi-gadgets.googlecode.com/svn/trunk/bowling/bowling.css"/&gt;</span>
+    <span style="background-color: yellow">&lt;script type="text/javascript" src="http://visapi-gadgets.googlecode.com/svn/trunk/bowling/bowling.js"&gt;&lt;/script&gt;</span>
+    &lt;script type="text/javascript" src="http://www.google.com/jsapi"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    <span style="background-color: yellow">&lt;div id="bowlingDiv" style="width: 500px"&gt;&lt;/div&gt;</span>
+    &lt;script type="text/javascript"&gt;
+      google.load("visualization", "1");
+      google.setOnLoadCallback(drawChart);
+      var chart;
+      function drawChart() {
+        data = new google.visualization.DataTable();
+        data.addColumn('number', 'John');
+        data.addColumn('number', '');
+        data.addColumn('number', 'Mike');
+        data.addColumn('number', '');
+        data.addRows(3);
+        data.setValue(0, 0, 2);
+        data.setValue(0, 1, 5);
+        data.setValue(0, 2, 0);
+        data.setValue(0, 3, 6);
+        data.setValue(1, 0, 8);
+        data.setValue(1, 1, 2);
+        data.setValue(1, 2, 4);
+        var outputDiv = document.getElementById('bowlingDiv');
+        table = new Bowling(outputDiv);
+        table.draw(data, null);
+      }
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+<h2>Expected Data Format</h2>
+
+An even number of columns, all are numbers.
+Each pair of column contain the first and second pin drops for one player.
+The label of the first column of the pair is used as the player's name.
+
+<h2>Options</h2>
+
+none
+
+<h2>Methods</h2>
+
+none
+
+
+<h2>Events</h2>
+
+none
+
+<h2>Data Policy</h2>
+All the data remains on the client, no data is sent to a server.
+
+<h2>License</h2>
+This visualization can be freely used by anyone.
+The entire <a href="http://visapi-gadgets.googlecode.com/svn/trunk/barsofstuff/bos.js">source code</a> is open-source. You can look at the code,
+copy the code, and modify it.
+
+<h2>Contact Information</h2>
+For comments, ideas problem reports please contact visapi.gadgets<b>@</b>gmail.com.
+
+</body>
+</html>

@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<Module>
+<ModulePrefs title="Agenda scheduler" 
+             height="400" 
+             author="The visapi-gadgest project"
+             author_email="visapi.gadgets@gmail.com"
+             description="Organize your schedule using the agenda gadget. Prepare a google spreadsheet table with 
+             your agenda items one per row. In the first column of each row print a start time value (e.g. 12:32). 
+             Now mark the table and add the gadget. The gadget would mark the current agenda item, the current 
+             time and the remaining time until the next item starts. Use the gadget preferences to make changes 
+             in the gadget display. Add the gadget to iGoogle or any webpage and share it with your colleagues 
+             and friends." 
+             screenshot="http://visapi-gadgets.googlecode.com/svn/trunk/agenda/countdown/agenda.PNG" 
+             thumbnail="http://visapi-gadgets.googlecode.com/svn/trunk/agenda/countdown/agenda-thumb.PNG"> 
+           <Require feature="idi"/>
+           <Require feature="locked-domain"/>  
+           <Require feature="settitle"/>  
+</ModulePrefs>  
+             
+<UserPref name="_table_query_url" display_name="Data source url" required="true" /> 
+<UserPref name="title" display_name="Title" required="false"/>
+<UserPref name="headerColor" display_name="Header color" default_value="" required="false" /> 
+<UserPref name="headerTextColor" display_name="Header text color" default_value="" required="false" /> 
+<UserPref name="highlightColor" display_name="Current item color" default_value="" required="false" /> 
+<UserPref name="countDownString" display_name="Countdown name (text/html)" default_value="" required="false" /> 
+<UserPref name="blinkingTime" display_name="Countdown blinking time (sec)" default_value="" required="false" /> 
+<UserPref name="numberOfItems" display_name="Items to show before/after (default 'All')" default_value="" required="false" /> 
+<UserPref name="delay" display_name="Delay all schedule (min)" default_value="" required="false" /> 
+<UserPref name="nextDay" display_name="Starts on following day" datatype="bool" default_value="false"/>
+<UserPref name="_table_query_refresh_interval" display_name="Data refresh rate (min)" default_value="0" datatype="enum" required="false">
+<EnumValue value="0" display_value="Never" /> 
+<EnumValue value="60" display_value="1" /> 
+<EnumValue value="300" display_value="5" /> 
+<EnumValue value="1800" display_value="30" /> 
+</UserPref>
+<Content type="html">
+<![CDATA[ 
+
+
+<style type="text/css">
+  .agenda-table {
+    font-family: arial, helvetica;
+    font-size: 1.0em;
+    border-collapse: collapse;
+    cursor: default;
+    margin: 0;
+    width: 100%;
+  }
+  
+  .agenda-cell {
+    border: 1px solid #ccc;
+    padding: 3px;
+    width: 80px;
+    white-space: nowrap;
+    font-size:80%;
+  }
+
+  .agenda-cell-time {
+    font-weight: bold;
+  }
+
+  .agenda-cell-right {
+    text-align: right;
+  }
+
+  .agenda-cell-center {
+    text-align: center;
+  }
+
+
+  .agenda-cell-highlight {
+    background: #9acfff;
+    font-size:100%;
+  }
+
+  .agenda-header {
+    background-color: #c3d9ff;
+    color: #112abb;
+    padding: 3px;
+    font-size: 100%;
+    font-weight: bold;
+    border: 1px solid #ddd;
+  }
+
+  .agenda-cell-index {
+    width: 20px;
+    text-align: center;
+    padding-right: 3px;
+    padding-left: 3px;
+  }
+  
+  .countdown-disclaimer {
+  }
+  
+</style>
+
+<div  style='overflow:auto'>
+<table summary=''>
+  <tr style='padding-bottom:3px'>
+    <td style='text-align:right;'><a href='http://docs.google.com/Doc?id=ddnnpnhx_22d268wbwk' target="_blank">help</a></td>
+  </tr>
+  <tr>  
+	  <table id='layout-table' style='display:none' summary=''>
+		  <tr>
+		    <td id='clock-div' style='text-align:right'>
+		    <span style='background-color: black;'>
+		    <img border=0  id="hourstens"></img><img border=0  id="hoursones"></img><img border=0  id="colon"></img><img border=0  id="minstens"></img><img border=0  id="minsones"></img>
+		    </span>
+		    </td>
+		  </tr>
+		  <tr>
+		    <td style="text-align:left;">
+		      <span id ='countdown-disclaimer' class='countdown-disclaimer'></span>
+		      <span id='countdown-div'></span>
+		    </td>
+		  </tr>
+		  <tr>
+		    <td>
+		      <div id='agenda-items'><table class='agenda-table' summary=''></table></div>
+		    </td>
+		   </tr>
+		  <tr>
+		    <td>
+		      <input type="button" value='Delay (min)' onclick='setDelay()'>&nbsp;
+		      <input id="delay-input"  style="width:50px">
+		    </td>
+		  </tr>
+	  </table>
+  </tr>
+</table>
+</div>
+
+<script src="http://www.google.com/jsapi" type="text/javascript"></script>
+<script src="http://visapi-gadgets.googlecode.com/svn/trunk/agenda/clock/clock.js" type="text/javascript"></script>
+<script src="http://visapi-gadgets.googlecode.com/svn/trunk/agenda/countdown/countdown.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+// Gadget helper.
+var gadgetHelper;
+var prefs = new _IG_Prefs();
+// The data table
+var dataTable;
+var numRows;
+var numCols;
+// The div elements.
+var itemsDiv;
+var disclaimerDiv;
+var clockDiv;
+var countdownDiv;
+// Number of seconds to the end of the current agenda item
+var timeForItem;
+// The setTimeOut object
+var timeOut;
+// The index of the current agenda index.
+var currentAgendaIndex;
+var headerColor = '';
+var headerTextColor = '';
+var highlightColor = '';
+var blinkingTime;
+var countDownString;
+var numberOfItems;
+var delay;
+var nextDay = false;
+_IG_RegisterOnloadHandler(loadVisualizationAPI);
+
+/**
+ * Load the module.
+ */
+function loadVisualizationAPI() {
+  google.load('visualization', '1');
+  google.setOnLoadCallback(initialize);
+}
+
+// Set the query and send it
+function initialize() {
+  gadgetHelper = new google.visualization.GadgetHelper();
+  blinkingTime = prefs.getInt('blinkingTime') || 30;
+  countDownString = prefs.getString('countDownString') || 'Remaining time <br>';
+  headerColor = prefs.getString('headerColor');
+  headerTextColor = prefs.getString('headerTextColor');
+  highlightColor = prefs.getString('highlightColor');
+  numberOfItems = prefs.getInt('numberOfItems');
+  nextDay = prefs.getBool('nextDay');
+  var title = prefs.getString('title');
+  if (title) {
+    _IG_SetTitle(title);
+  }
+  delay = prefs.getInt('delay') || 0;
+  document.getElementById('delay-input').value = delay;
+  var query = gadgetHelper.createQueryFromPrefs(prefs);
+  query.send(responseHandler);
+};
+
+// Get the query response and retrieve the data table.
+function responseHandler(resp) {
+  if (!gadgetHelper.validateResponse(resp)) {
+    alert('Error: illegal data source url.')
+    return;
+  };
+  dataTable = resp.getDataTable();
+  numCols = dataTable.getNumberOfColumns();
+  numRows =  dataTable.getNumberOfRows();
+  if (numCols == 0) {
+    alert('Error: no columns');
+    return;
+  }
+  if (numRows == 0) {
+    alert('Error: no rows.');
+    return;
+  }
+  var timeColumnType = dataTable.getColumnType(0);
+  if (timeColumnType != 'timeofday') {
+    alert('Error: first column must be of type timeofday [h:mm:ss].');
+    return;
+  } 
+  // Set the dom elements.
+  clockDiv = document.getElementById('clock-div');
+  countdownDiv = document.getElementById('countdown-div');
+  itemsDiv = document.getElementById('agenda-items');
+  disclaimerDiv = document.getElementById('countdown-disclaimer');
+  disclaimerDiv.innerHTML = countDownString;
+  document.getElementById('layout-table').style.display = '';
+  // Show the agenda table
+  currentAgendaIndex = 0;
+  showCurrentAgenda();
+  clock.run();
+  runCountdownClock();
+}
+
+// Sets the delay value. Does not change the pref.
+function setDelay() {
+  var val = document.getElementById('delay-input').value;
+  if (isNaN(parseInt(val, 10))) {
+    return;
+  }
+  delay = parseInt(val, 10);
+  stopClockRunning();
+  currentAgendaIndex = 0;
+  showCurrentAgenda();
+  runCountdownClock();
+}
+
+// Initialize the agenda by rendering the table and clock for the current
+// agenda item.
+function showCurrentAgenda() {
+  setAgendaItemTimeInSeconds();
+  renderTable();
+}
+
+// Get the time to show for this row index in seconds.
+function setAgendaItemTimeInSeconds() {
+  var now = new Date();
+  if (currentAgendaIndex == numRows - 1) {
+    timeForItem = 0;
+    return;
+  }
+  var finishTime = dataTable.getValue(currentAgendaIndex + 1, 0);
+  var finishTimeDate = new Date();
+  finishTimeDate.setHours(finishTime[0]);
+  finishTimeDate.setMinutes(finishTime[1] + delay);
+  finishTimeDate.setSeconds(finishTime[2]);
+  timeForItem = (finishTimeDate.getTime() - now.getTime()) / 1000;
+  // If time to next item has passed by more than 4 hours assume next day
+  if (timeForItem < 0 && nextDay) {
+    timeForItem = timeForItem + 24*3600;
+  }
+  return;
+}
+
+// Render the table.
+function renderTable() {
+  var tbody = document.createElement('tbody');
+  var table = itemsDiv.firstChild;
+  var child;
+  while ((child = table.firstChild)) {
+    table.removeChild(child);
+  }
+  table.appendChild(tbody);
+  var row,cell;
+  row = document.createElement('tr');
+  tbody.appendChild(row);
+  // Append the column headers.
+  for (var ind = 0; ind < numCols; ind++) {
+    cell = createCell(dataTable.getColumnLabel(ind), 'agenda-cell agenda-header');
+    row.appendChild(cell);
+    if (headerColor != '') {
+      cell.style.backgroundColor = headerColor;
+    }
+
+  }
+  // Append the table rows.
+  var start, end;
+  if (numberOfItems <= 0) {
+    start = 0;
+    end = numRows -1;
+  } else {
+    start = Math.max(currentAgendaIndex - numberOfItems, 0);
+    end = Math.min(currentAgendaIndex + numberOfItems, numRows -1);
+  }
+  for (var rowInd = start; rowInd <= end; rowInd++) {
+    row = document.createElement('tr');
+    var className = (rowInd == currentAgendaIndex) ? 'agenda-cell agenda-cell-highlight' : 'agenda-cell';
+    tbody.appendChild(row);
+    for (var colInd = 0; colInd < numCols; colInd++) {
+      var type = dataTable.getColumnType(colInd);
+      var additionalClass = '';
+      switch (type) {
+        case 'number':
+          additionalClass += ' agenda-cell-right';
+          break;
+        case 'timeofday':
+        case 'date':
+        case 'datetime':
+          additionalClass += ' agenda-cell-center';
+          break;
+      }
+      if (colInd == 0 && rowInd == currentAgendaIndex) {
+        additionalClass += ' agenda-cell-time';
+      }
+      if (colInd == 0 && delay != 0) {
+        cell = createCell(getFormattedTimeWithDelay(rowInd), className + additionalClass);
+      } else {
+        cell = createCell(dataTable.getFormattedValue(rowInd, colInd), className + additionalClass);
+      }
+      if (highlightColor != '' && rowInd == currentAgendaIndex ) {
+        cell.style.backgroundColor = highlightColor;  
+      }
+      row.appendChild(cell);
+    }
+  }
+}
+
+function getFormattedTimeWithDelay(rowInd) {
+  var value = dataTable.getValue(rowInd, 0);
+  var d = new Date();
+  d.setHours(value[0]);
+  d.setMinutes(value[1] + delay);
+  d.setSeconds(value[2]);
+  var hours = d.getHours();
+  var minutes = d.getMinutes();
+  var seconds = d.getSeconds();
+  hours = (hours < 10) ? '0' + String(hours) : hours;
+  minutes = (minutes < 10) ? '0' + String(minutes) : minutes;
+  seconds = (seconds < 10) ? '0' + String(seconds) : seconds;
+  return hours + ':' + minutes + ':' + seconds;
+}
+
+// Create a td cell.
+function createCell(value, className) {
+  var cell = document.createElement('td');
+  cell.appendChild(document.createTextNode(value));
+  cell.className = className;
+  return cell;
+}
+
+// Renders a clock for the current timeForItem.
+function renderClock () {
+  var d = new Date();
+  d.setTime(timeForItem*1000)
+  countdown.update(d, countdownDiv);
+}
+
+// Run the countdown clock
+function runCountdownClock() {
+  if (timeForItem < 0) {
+    timeForItem = 0;
+    renderClock();
+    currentAgendaIndex++;
+    if (currentAgendaIndex == numRows) {
+      handleStop();
+      return;
+    }
+    showCurrentAgenda();
+    timeOut = setTimeout(function() {runCountdownClock()}, 100)
+    return;
+  } else {
+    renderClock();
+    timeForItem -= 1;
+  }
+  if (timeForItem < blinkingTime && timeForItem > 0) {
+    disclaimerDiv.style.textDecoration = 'blink';
+    disclaimerDiv.style.color = 'red';
+  } else {
+    disclaimerDiv.style.textDecoration = '';
+    disclaimerDiv.style.color = '';
+  }
+  timeOut = setTimeout(function() {runCountdownClock()}, 1000);
+}
+
+// Stop the running of the clock.
+function stopClockRunning() {
+  if (timeOut) {
+    clearTimeout(timeOut);
+  }
+}
+
+function handleStop() {
+  stopClockRunning();
+}
+
+</script>
+
+  ]]> 
+</Content>
+</Module>

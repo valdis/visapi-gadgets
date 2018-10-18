@@ -1,0 +1,200 @@
+<html>
+<head>
+<title>Bars Of Stuff - Sample</title>
+<link rel="stylesheet" type="text/css" href="http://visapi-gadgets.googlecode.com/svn/trunk/barsofstuff/bos.css" />
+<style>
+body, td, th { font-family: verdana, arial, helvetica; }
+th { background-color: #9999ff }
+pre { border: 1px solid #333333; background-color: #f7f7f7; }
+</style>
+</head>
+<body>
+
+<h1>Bars Of Stuff - Sample</h1>
+
+<h2>Overview</h2>
+A bars chart made out of various objects (images).
+This chart displays only positive values. Negative values are ignored.
+
+<p>
+The maximal width of bars is determined by the width of the contaner (div) element.
+</p>
+
+<h2>Example</h2>
+<table>
+  <tr valign="top">
+    <td><div id="chartdiv" style="width:500px"></div></td>
+    <td width="30"></td>
+    <td><div id="tablediv"></div></td>
+  </tr>
+</table>
+
+<script type="text/javascript" src="http://visapi-gadgets.googlecode.com/svn/trunk/barsofstuff/bos.js"></script>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">
+google.load('visualization', '1', {packages: ['table']});
+google.setOnLoadCallback(drawChart);
+var chart;
+function drawChart() {
+  var data = new google.visualization.DataTable();
+  data.addColumn('string', 'Label');
+  data.addColumn('number', 'Value');
+  data.addRows(4);
+  data.setCell(0, 0, 'France');
+  data.setCell(1, 0, 'Sweden');
+  data.setCell(2, 0, 'USA');
+  data.setCell(3, 0, 'Poland');
+  data.setCell(0, 1, 10000, '10,000');
+  data.setCell(1, 1, 30000, '30,000');
+  data.setCell(2, 1, 20000, '20,000');
+  data.setCell(3, 1, 7500, '7,500');
+  var chartDiv = document.getElementById('chartdiv');
+  var options = {title: 'Commuters By Country'};
+  chart = new BarsOfStuff(chartDiv);
+  chart.draw(data, options);
+
+  table = new google.visualization.Table(document.getElementById('tablediv'));
+  table.draw(data, {showRowNumber: true});
+
+  google.visualization.events.addListener(chart, 'select',
+     function() { table.setSelection(chart.getSelection());  });
+  google.visualization.events.addListener(table, 'select',
+     function() { chart.setSelection(table.getSelection());  });
+}
+</script>
+
+<h2>Sample Code</h2>
+
+<pre>
+&lt;html&gt;
+  &lt;head&gt;
+    <span style="background-color: yellow">&lt;link rel="stylesheet" type="text/css" href="http://visapi-gadgets.googlecode.com/svn/trunk/barsofstuff/bos.css"/&gt;</span>
+    <span style="background-color: yellow">&lt;script type="text/javascript" src="http://visapi-gadgets.googlecode.com/svn/trunk/barsofstuff/bos.js"&gt;&lt;/script&gt;</span>
+    &lt;script type="text/javascript" src="http://www.google.com/jsapi"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    <span style="background-color: yellow">&lt;div id="chartdiv" style="width: 500px"&gt;&lt;/div&gt;</span>
+    &lt;script type="text/javascript"&gt;
+      google.load("visualization", "1");
+      google.setOnLoadCallback(drawChart);
+      var chart;
+      function drawChart() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Label');
+        data.addColumn('number', 'Value');
+        data.addRows(4);
+        data.setCell(0, 0, 'France');
+        data.setCell(1, 0, 'Sweden');
+        data.setCell(2, 0, 'USA');
+        data.setCell(3, 0, 'Poland');
+        data.setCell(0, 1, 10000, '10,000');
+        data.setCell(1, 1, 30000, '30,000');
+        data.setCell(2, 1, 20000, '20,000');
+        data.setCell(3, 1, 7500, '7,500');
+        var chartDiv = document.getElementById('chartdiv');
+        var options = {title: 'Commuters By Country'};
+        <span style="background-color: yellow">chart = new BarsOfStuff(chartDiv);</span>
+        chart.draw(data, options);
+        //google.visualization.events.addListener(chart, 'select', handleSelect);
+      }
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+<h2>Expected Data Format</h2>
+
+The chart suport 2 data formats:
+
+<ul>
+<li>
+The first column is a string, which contains the label for the bar.
+The second column contains values (numeric).
+</li>
+<li>
+All columns are numeric. The column label is used to as the bar label.
+Only values in the first row are used.
+</li>
+</ul>
+
+<h2>Options</h2>
+
+<table border="1" cellpadding="2" cellspacing="1">
+  <tr>
+    <th>Name</th>
+    <th>Type</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>canSelect</th>
+    <td>boolean</td>
+    <td>If set to true (the default), users can select bars by clicking on them.</td>
+  </tr>
+  <tr>
+    <td>max</th>
+    <td>number</td>
+    <td>The maximal value to display. The default is the maximal value of the data values.</td>
+  </tr>
+  <tr>
+    <td>min</th>
+    <td>number</td>
+    <td>The minimal value to display. The default is the maximal value of the data values.</td>
+  </tr>
+  <tr>
+    <td>type</th>
+    <td>string</td>
+    <td>Type of images. Case insensitive. Can be:
+        'Train' (default), 'Chocolate', 'Rope', 'Truffle', 'Worm', 'Horse'.
+    </td>
+  </tr>
+  <tr>
+    <td>title</th>
+    <td>string</td>
+    <td>A title to display above the chart. If not specified, no title is displayed.</td>
+  </tr>
+  <tr>
+    <td>width</th>
+    <td>string</td>
+    <td>The width of the chart. Can be relative, e.g. '50%' or in pixels, e.g. '340'. Default is '100%'</td>
+  </tr>
+</table>
+
+<h2>Methods</h2>
+<table border="1" cellpadding="2" cellspacing="1">
+  <tr>
+    <th>Name</th>
+    <th>Returns</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>setSelection</th>
+    <td>none</td>
+    <td>Standard setSelection implementation.</td>
+  </tr>
+  <tr>
+    <td>getSelection</th>
+    <td>array of selected elements</td>
+    <td>Standard getSelection implementation.</td>
+  </tr>
+</table>
+
+<h2>Events</h2>
+
+The chart triggers the standard 'select' event upon selection change. Note that if the option 'canSelect' is
+set to false, the chart will not allow selection and will not trigger the select event.
+Only a single bar may be selected (by clicking on the image).
+
+
+<h2>Data Policy</h2>
+All the data remains on the client, no data is sent to a server.
+
+<h2>License</h2>
+This visualization can be freely used by anyone.
+The entire <a href="http://visapi-gadgets.googlecode.com/svn/trunk/barsofstuff/bos.js">source code</a> is open-source. You can look at the code,
+copy the code, and modify it.
+
+<h2>Contact Information</h2>
+For comments, ideas problem reports please contact visapi.gadgets<b>@</b>gmail.com.
+
+</body>
+</html>

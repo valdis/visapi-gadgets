@@ -1,0 +1,94 @@
+<html>
+<head>
+<title>Bars of Stuff - Sample</title>
+<link rel="stylesheet" type="text/css" href="http://visapi-gadgets.googlecode.com/svn/trunk/barsofstuff/bos.css" />
+</head>
+<body>
+<div id="chart" style="width: 50%"><img src="http://visapi-gadgets.googlecode.com/svn/trunk/image/spinner.gif" /></div>
+<script type="text/javascript" src="http://visapi-gadgets.googlecode.com/svn/trunk/barsofstuff/bos.js"></script>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">
+google.load("visualization", "1");
+google.setOnLoadCallback(initialize); // Set callback to run when API is loaded
+function initialize() {
+  // Create and send the query.
+  // gadgetHelper = new google.visualization.GadgetHelper();
+  // var query = gadgetHelper.createQueryFromPrefs(prefs);
+  // query.send(handleQueryResponse);  // Send the query with a callback function
+  drawChart();
+}
+
+</script>
+
+<script>
+var chart;
+var data;
+var options = {title: 'Demo of BarsOfStuff'};
+function drawChart() {
+  data = new google.visualization.DataTable();
+  data.addColumn('string', 'Label');
+  data.addColumn('number', 'Value');
+  data.addRows(3);
+  data.setValue(0, 0, 'First');
+  data.setValue(1, 0, 'Second');
+  data.setValue(2, 0, 'Third');
+  data.setCell(0, 1, 10, '10');
+  data.setCell(1, 1, 30, '30');
+  data.setCell(2, 1, 20, '20');
+  var chartDiv = document.getElementById('chart');
+  chart = new BarsOfStuff(chartDiv);
+  google.visualization.events.addListener(chart, 'select', handleSelect);
+  redraw();
+}
+function redraw() {
+  chart.draw(data, options);
+}
+
+function select(coords) {
+  if (chart) {
+    chart.setSelection(coords);
+  }
+}
+
+function handleSelect() {
+  var selection = chart.getSelection();
+  var msg = 'selection: ';
+  if (selection.length == 0) {
+    msg += 'empty';
+  } else {
+    for (var i = 0; i < selection.length; i++) {
+      if (i > 0) {
+        msg += ' | ';
+      }
+      msg += selection[i].row+','+selection[0].column;
+    }
+  }
+  document.getElementById('log').innerHTML = msg;
+}
+function setType(type) {
+  options.type=type;
+  redraw();
+}
+
+</script>
+<hr />
+Type: <select onchange="setType(this.options[this.selectedIndex].value)" >
+<option></option>
+<option>Train</option>
+<option>Rope</option>
+<option>Chocolate</option>
+<option>Truffle</option>
+<option>Worm</option>
+<option>Horse</option>
+</select>
+<hr />
+<a href="javascript:select([{row:0}])">1</a> |
+<a href="javascript:select([{row:1}])">2</a> |
+<a href="javascript:select([{row:2}])">3</a> |
+<a href="javascript:select([{row:2},{row:0}])">1+3</a> |
+<a href="javascript:select([])">none</a> |
+<a href="javascript:handleSelect()">Show selection</a>
+<hr />
+<div id="log"></div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<html>
+<head>
+<title>Chess viewer - Sample</title>
+<style>
+body, td, th { font-family: verdana, arial, helvetica; }
+th { background-color: #9999ff }
+pre { border: 1px solid #333333; background-color: #f7f7f7; }
+</style>
+</head>
+<body>
+
+<h1>Chess viewer - Sample</h1>
+
+<h2>Overview</h2>
+A chess game viewer, displaying the board based on the moves typed on the spreadsheet.
+This visualization is a thin wrapper around LT-PGN-VIEWER 3.4 chess game viewer (http://www.lutanho.net/pgn/pgnviewer.html).
+
+<h2>Example</h2>
+  <iframe id="board" width="500" height="500" scrolling="no">
+  </iframe>
+    
+<script type="text/javascript" src="http://visapi-gadgets.googlecode.com/svn/trunk/pgnviewer/chessviewer.js"></script>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">
+google.load('visualization', '1');
+google.setOnLoadCallback(drawBoard);
+var board;
+function drawBoard() {
+  data = new google.visualization.DataTable();
+  data.addColumn('string', 'White');
+  data.addColumn('string', 'Black');
+  data.addRows(3);
+  data.setValue(0, 0, 'g4');
+  data.setValue(0, 1, 'e5');
+  data.setValue(1, 1, 'b4');
+  data.setValue(1, 2, 'b5!');
+  data.setValue(2, 0, 'f4');
+  data.setValue(2, 1, 'Qh4+');
+  
+  var ifr = document.getElementById('board');
+  var board = new Chess(ifr);
+  board.draw(data, options);
+}
+</script>
+</body>
+</html>

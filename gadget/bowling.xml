@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+  <ModulePrefs title="Bowling" 
+      author="The visapi-gadgest project"
+      author_email="visapi.gadgets@gmail.com"
+      description="Bowling Score Table"
+      thumbnail="http://visapi-gadgets.googlecode.com/svn/trunk/image/thumb_bowling.png" 
+      screenshot="http://visapi-gadgets.googlecode.com/svn/trunk/image/sh_bowling.png">
+    <Require feature="idi"/>
+    <Require feature="locked-domain"/>  
+    <Require feature="settitle"/>  
+  </ModulePrefs>
+  <UserPref name="_table_query_url" display_name="Data source URL" required="true"/>
+  <UserPref name="title" display_name="Gadget Title (optional)" required="false"/>
+  <Content type="html">
+  <![CDATA[
+  <link rel="stylesheet" type="text/css" href="http://visapi-gadgets.googlecode.com/svn/trunk/bowling/bowling.css" />
+  <div id="chart" style="overflow: auto; background-color: black;"><b style="color: white;">Loading...</b></div>
+  <script type="text/javascript" src="http://visapi-gadgets.googlecode.com/svn/trunk/bowling/bowling.js"></script>
+  <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+  <script type="text/javascript">
+    _IG_RegisterOnloadHandler(loadAPI);
+    
+    function loadAPI() {
+      google.load('visualization', '1');
+      google.setOnLoadCallback(init);
+    }  
+
+    var prefs = null;
+
+    function init() {
+      prefs = new _IG_Prefs();
+      var title = prefs.getString('title');
+      if (title) {
+        _IG_SetTitle(title);
+      }
+      var container = document.getElementById('chart');
+      container.style.width = document.body.clientWidth + 'px';
+      container.style.height = document.body.clientHeight + 'px';
+      sendQuery();
+    }
+
+    var gadgetHelper = null;
+    function sendQuery() {
+      gadgetHelper = gadgetHelper || new google.visualization.GadgetHelper();
+      var query = gadgetHelper.createQueryFromPrefs(prefs);
+      query.send(handleQueryResponse);  
+    }
+    
+    function handleQueryResponse(response) {
+      // Default error message handling
+      if (!gadgetHelper.validateResponse(response))
+        return;
+      
+      var data = response.getDataTable();
+      var options = null;
+      var chart = new Bowling(document.getElementById('chart'));
+      chart.draw(data, options);
+    }   
+  </script>
+  ]]>
+ </Content>
+</Module>

@@ -1,0 +1,7 @@
+.bowling-table {border-collapse: collapse; background-color: #000; }
+.bowling-td {font-family: verdana, arial, helvetica; font-size: 7pt; border: 1px solid #333; text-align: center; color: #fff; padding-right: 3px; padding-left: 3px; }
+.bowling-name {font-size: 10pt;}
+.bowling-turn {border: 2px solid orange; background-color: #666; }
+.bowling-score {font-size: 10pt; font-weight: bold; }
+.bowling-seq {text-align: right; color: #aaa; }
+.bowling-note {color: yellow; }

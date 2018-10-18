@@ -1,0 +1,109 @@
+<html>
+<head>
+<title>WordCloud - Sample</title>
+<link rel="stylesheet" type="text/css" href="http://visapi-gadgets.googlecode.com/svn/trunk/wordcloud/wc.css" />
+<style>
+pre { border: 1px solid #333; background-color:fcfcfc; }
+</style>
+</head>
+<body>
+
+<h1>WordCloud - Sample</h1>
+
+<h2>Overview</h2>
+A list of words, where the size and color of each word is determined
+by the number of times it appears in the text.
+
+<h2>Example</h2>
+<table>
+  <tr valign="top">
+    <td><div id="wcdiv" style="width: 200px; border: 1px solid #ccc"></div></td>
+    <td width="30"></td>
+    <td><div id="tablediv"></div></td>
+  </tr>
+</table>
+
+<script type="text/javascript" src="http://visapi-gadgets.googlecode.com/svn/trunk/wordcloud/wc.js"></script>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">
+google.load('visualization', '1', {packages: ['table']});
+google.setOnLoadCallback(draw);
+function draw() {
+  var data = new google.visualization.DataTable();
+  data.addColumn('string', 'Text1');
+  data.addColumn('string', 'Text2');
+  data.addRows(3);
+  data.setCell(0, 0, 'This is a test');
+  data.setCell(0, 1, 'This test is quite hard');
+  data.setCell(1, 0, 'A hard test or not?');
+  data.setCell(1, 1, 'This was not too hard');
+  data.setCell(2, 0, 'Hard hard hard this is so hard !!!');
+  data.setCell(2, 1, 'For every test there is a solution. For every one');
+  var outputDiv = document.getElementById('wcdiv');
+  var wc = new WordCloud(outputDiv);
+  wc.draw(data, null);
+
+  table = new google.visualization.Table(document.getElementById('tablediv'));
+  table.draw(data);
+}
+</script>
+
+<h2>Sample Code</h2>
+
+<pre>
+&lt;html&gt;
+  &lt;head&gt;
+    <span style="background-color: yellow">&lt;link rel="stylesheet" type="text/css" href="http://visapi-gadgets.googlecode.com/svn/trunk/wordcloud/wc.css"/&gt;</span>
+    <span style="background-color: yellow">&lt;script type="text/javascript" src="http://visapi-gadgets.googlecode.com/svn/trunk/wordcloud/wc.js"&gt;&lt;/script&gt;</span>
+    &lt;script type="text/javascript" src="http://www.google.com/jsapi"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id="wcdiv"&gt;&lt;/div&gt;
+    &lt;script type="text/javascript"&gt;
+      google.load("visualization", "1");
+      google.setOnLoadCallback(draw);
+      function draw() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Text1');
+        data.addColumn('string', 'Text2');
+        data.addRows(3);
+        data.setCell(0, 0, 'This is a test');
+        data.setCell(0, 1, 'This test is quite hard');
+        data.setCell(1, 0, 'A hard test or not?');
+        data.setCell(1, 1, 'This was not too hard');
+        data.setCell(2, 0, 'Hard hard hard this is so hard !!!');
+        data.setCell(2, 1, 'For every test there is a solution. For every one');
+        var outputDiv = document.getElementById('wcdiv');
+        <span style="background-color: yellow">var wc = new WordCloud(outputDiv);</span>
+        wc.draw(data, null);
+      }
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+<h2>Expected Data Format</h2>
+
+Any number of rows and columns. All string values are concatenated.
+Any other column type is ignored.
+
+<h2>Options</h2>
+<tt>stopWords</tt> A string of all the words to ignore in the text. The words should be separated
+by spaces or commas. The default value is "a an and is or the".
+
+Example:
+<pre>
+  wc.draw(data, {stopWords: 'a an and is or the of for to'});
+</pre>
+
+<h2>Methods</h2>
+none
+
+<h2>Events</h2>
+none
+
+<h2>Contact Information</h2>
+For comments, ideas problem reports please contact visapi.gadgets<b>@</b>gmail.com.
+
+</body>
+</html>
